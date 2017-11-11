@@ -8,11 +8,18 @@ uses
 type
   TBowlingGame = class(TInterfacedObject, IBowlingGame)
   private
+    type
+      TBowlingFrame = record
+        Score: Integer;
+        Size: Integer;
+      end;
+  private
     FRolls: array[0..20] of Integer;
     FCurrentRollIndex: Integer;
     function IsStrike(const FrameStartIndex: Integer): Boolean;
     function IsSpare(const FrameStartIndex: Integer): Boolean;
     function SumTwoConsecutiveRolls(const StartIndex: Integer): Integer;
+    function CreateFrameInfo(const FrameStartIndex: Integer): TBowlingFrame;
   public
     constructor Create;
     procedure Roll(Pins: Integer);
@@ -30,29 +37,37 @@ end;
 function TBowlingGame.Score: Integer;
 var
   FrameStartIndex: Integer;
-  Frame: Integer;
+  FrameIndex: Integer;
+  Frame: TBowlingFrame;
 begin
   Result := 0;
   FrameStartIndex := 0;
-  for Frame := 0 to 10 -1 do
+  for FrameIndex := 0 to 10 -1 do
   begin
-    if IsStrike(FrameStartIndex) then
+    Frame := CreateFrameInfo(FrameStartIndex);
+    Inc(Result, Frame.Score);
+    Inc(FrameStartIndex, Frame.Size);
+  end;
+end;
+
+function TBowlingGame.CreateFrameInfo(const FrameStartIndex: Integer): TBowlingFrame;
+begin
+  if IsStrike(FrameStartIndex) then
+  begin
+    Result.Score := 10 + SumTwoConsecutiveRolls(FrameStartIndex + 1);
+    Result.Size := 1;
+  end
+  else
+  begin
+    if IsSpare(FrameStartIndex) then
     begin
-      Result := Result + 10 + SumTwoConsecutiveRolls(FrameStartIndex + 1);
-      Inc(FrameStartIndex, 1);
+      Result.Score := 10 + FRolls[FrameStartIndex + 2];
+      Result.Size := 2;
     end
     else
     begin
-      if IsSpare(FrameStartIndex) then
-      begin
-        Result := Result + 10 + FRolls[FrameStartIndex + 2];
-        Inc(FrameStartIndex, 2);
-      end
-      else
-      begin
-        Result := Result + FRolls[FrameStartIndex] + FRolls[FrameStartIndex + 1];
-        Inc(FrameStartIndex, 2);
-      end;
+      Result.Score := SumTwoConsecutiveRolls(FrameStartIndex);
+      Result.Size := 2;
     end;
   end;
 end;
