@@ -20,6 +20,9 @@ type
     function IsSpare(const FrameStartIndex: Integer): Boolean;
     function SumTwoConsecutiveRolls(const StartIndex: Integer): Integer;
     function CreateFrameInfo(const FrameStartIndex: Integer): TBowlingFrame;
+    function CreateStrikeFrame(const FrameStartIndex: Integer): TBowlingFrame;
+    function CreateSpareFrame(const FrameStartIndex: Integer): TBowlingFrame;
+    function CreateNonBonusFrame(const FrameStartIndex: Integer): TBowlingFrame;
   public
     constructor Create;
     procedure Roll(Pins: Integer);
@@ -42,7 +45,7 @@ var
 begin
   Result := 0;
   FrameStartIndex := 0;
-  for FrameIndex := 0 to 10 -1 do
+  for FrameIndex := 0 to 10 - 1 do
   begin
     Frame := CreateFrameInfo(FrameStartIndex);
     Inc(Result, Frame.Score);
@@ -53,23 +56,11 @@ end;
 function TBowlingGame.CreateFrameInfo(const FrameStartIndex: Integer): TBowlingFrame;
 begin
   if IsStrike(FrameStartIndex) then
-  begin
-    Result.Score := 10 + SumTwoConsecutiveRolls(FrameStartIndex + 1);
-    Result.Size := 1;
-  end
+    Result := CreateStrikeFrame(FrameStartIndex)
+  else if IsSpare(FrameStartIndex) then
+    Result := CreateSpareFrame(FrameStartIndex)
   else
-  begin
-    if IsSpare(FrameStartIndex) then
-    begin
-      Result.Score := 10 + FRolls[FrameStartIndex + 2];
-      Result.Size := 2;
-    end
-    else
-    begin
-      Result.Score := SumTwoConsecutiveRolls(FrameStartIndex);
-      Result.Size := 2;
-    end;
-  end;
+    Result := CreateNonBonusFrame(FrameStartIndex);
 end;
 
 constructor TBowlingGame.Create;
@@ -95,6 +86,24 @@ end;
 function TBowlingGame.SumTwoConsecutiveRolls(const StartIndex: Integer): Integer;
 begin
   Result := FRolls[StartIndex] + FRolls[StartIndex + 1];
+end;
+
+function TBowlingGame.CreateStrikeFrame(const FrameStartIndex: Integer): TBowlingFrame;
+begin
+  Result.Score := 10 + SumTwoConsecutiveRolls(FrameStartIndex + 1);
+  Result.Size := 1;
+end;
+
+function TBowlingGame.CreateSpareFrame(const FrameStartIndex: Integer): TBowlingFrame;
+begin
+  Result.Score := 10 + FRolls[FrameStartIndex + 2];
+  Result.Size := 2;
+end;
+
+function TBowlingGame.CreateNonBonusFrame(const FrameStartIndex: Integer): TBowlingFrame;
+begin
+  Result.Score := SumTwoConsecutiveRolls(FrameStartIndex);
+  Result.Size := 2;
 end;
 
 end.
