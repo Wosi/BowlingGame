@@ -12,6 +12,8 @@ type
   private
     FGame: IBowlingGame;
     procedure RollMany(const N: Integer; const Pins: Integer);
+    procedure RollSpare;
+    procedure RollStrike;
   protected
     procedure SetUp; override;
   published
@@ -54,8 +56,7 @@ end;
 
 procedure TTestBowlingGame.TestOneSpare;
 begin
-  FGame.Roll(5);
-  FGame.Roll(5);
+  RollSpare;
   FGame.Roll(3);
   RollMany(17, 0);
 
@@ -64,7 +65,7 @@ end;
 
 procedure TTestBowlingGame.TestOneStrike;
 begin
-  FGame.Roll(10);
+  RollStrike;
   FGame.Roll(3);
   FGame.Roll(5);
   RollMany(17, 0);
@@ -81,6 +82,17 @@ begin
   RollMany(16, 0);
 
   CheckEquals(13, FGame.Score);
+end;
+
+procedure TTestBowlingGame.RollSpare;
+begin
+  FGame.Roll(5);
+  FGame.Roll(5);
+end;
+
+procedure TTestBowlingGame.RollStrike;
+begin
+  FGame.Roll(10);
 end;
 
 initialization

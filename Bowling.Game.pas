@@ -10,6 +10,9 @@ type
   private
     FRolls: array[0..20] of Integer;
     FCurrentRollIndex: Integer;
+    function IsStrike(const FrameStartIndex: Integer): Boolean;
+    function IsSpare(const FrameStartIndex: Integer): Boolean;
+    function SumTwoConsecutiveRolls(const StartIndex: Integer): Integer;
   public
     constructor Create;
     procedure Roll(Pins: Integer);
@@ -33,14 +36,14 @@ begin
   FrameStartIndex := 0;
   for Frame := 0 to 10 -1 do
   begin
-    if FRolls[FrameStartIndex] = 10 then
+    if IsStrike(FrameStartIndex) then
     begin
-      Result := Result + 10 + FRolls[FrameStartIndex + 1] + FRolls[FrameStartIndex + 2];
+      Result := Result + 10 + SumTwoConsecutiveRolls(FrameStartIndex + 1);
       Inc(FrameStartIndex, 1);
     end
     else
     begin
-      if FRolls[FrameStartIndex] + FRolls[FrameStartIndex + 1] = 10 then
+      if IsSpare(FrameStartIndex) then
       begin
         Result := Result + 10 + FRolls[FrameStartIndex + 2];
         Inc(FrameStartIndex, 2);
@@ -62,6 +65,21 @@ begin
   FCurrentRollIndex := 0;
   for I := 0 to Length(FRolls) - 1 do
     FRolls[I] := 0;
+end;
+
+function TBowlingGame.IsStrike(const FrameStartIndex: Integer): Boolean;
+begin
+  Result := FRolls[FrameStartIndex] = 10;
+end;
+
+function TBowlingGame.IsSpare(const FrameStartIndex: Integer): Boolean;
+begin
+  Result := SumTwoConsecutiveRolls(FrameStartIndex) = 10;
+end;
+
+function TBowlingGame.SumTwoConsecutiveRolls(const StartIndex: Integer): Integer;
+begin
+  Result := FRolls[StartIndex] + FRolls[StartIndex + 1];
 end;
 
 end.
